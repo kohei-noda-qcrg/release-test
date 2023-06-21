@@ -25,15 +25,15 @@ jobs:
         id: get_tag_name
         run: |
           TAG_NAME=$(echo "${{ github.head_ref }}" | sed -e 's/release-//')
-          echo "::set-output name=tag_name::$TAG_NAME"
+          echo "tag_name=${TAG_NAME}" >> $GITHUB_ENV
       - name: Create tag
         run: |
-          git tag ${{ steps.get_tag_name.outputs.tag_name }}
-          git push origin ${{ steps.get_tag_name.outputs.tag_name }}
+          git tag ${{ github.env.tag_name }}
+          git push origin ${{ github.env.tag_name }}
       - name: Create release
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ steps.get_tag_name.outputs.tag_name }}
-          release_name: ${{ steps.get_tag_name.outputs.tag_name }}
+          tag_name: ${{ github.env.tag_name }}
+          release_name: ${{ github.env.tag_name }}
