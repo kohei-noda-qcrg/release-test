@@ -1,0 +1,1 @@
+from src.release_test.release_main import main
