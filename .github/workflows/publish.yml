@@ -21,10 +21,19 @@ jobs:
       - name: Build package
         run: |
           hatch build
+      - name: Get the tag name
+        id: get_tag_name
+        run: |
+          TAG_NAME=$(echo "${{ github.head_ref }}" | sed -e 's/release-//')
+          echo "::set-output name=tag_name::$TAG_NAME"
+      - name: Create tag
+        run: |
+          git tag ${{ steps.get_tag_name.outputs.tag_name }}
+          git push origin ${{ steps.get_tag_name.outputs.tag_name }}
       - name: Create release
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ github.ref }}
-          release_name: ${{ github.ref }}
+          tag_name: ${{ steps.get_tag_name.outputs.tag_name }}
+          release_name: ${{ steps.get_tag_name.outputs.tag_name }}
