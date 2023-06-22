@@ -26,10 +26,7 @@ env:
   VERSION_UP_TYPE: ""
   PACKAGE_NAME: pymolecule-parser
 jobs:
-  test:
-    uses: ./.github/workflows/reusable_test.yml
   release-pr:
-    needs: test
     runs-on: ubuntu-22.04
     timeout-minutes: 5
     steps:
@@ -46,13 +43,13 @@ jobs:
         run: |
           if ${{ github.event.inputs.major_versionup }}; then
             python .github/scripts/versionup.py --major
-            echo "VERSION_UP_TYPE=major" >> "$GITHUB_ENV
+            echo "VERSION_UP_TYPE=major" >> $GITHUB_ENV
           elif ${{ github.event.inputs.minor_versionup }}; then
             python .github/scripts/versionup.py --minor
-            echo "VERSION_UP_TYPE=minor" >> "$GITHUB_ENV
+            echo "VERSION_UP_TYPE=minor" >> $GITHUB_ENV
           elif ${{ github.event.inputs.patch_versionup }}; then
             python .github/scripts/versionup.py --patch
-            echo "VERSION_UP_TYPE=patch" >> "$GITHUB_ENV
+            echo "VERSION_UP_TYPE=patch" >> $GITHUB_ENV
           fi
       - name: Get the NEW_VERSION
         run: |
