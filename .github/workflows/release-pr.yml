@@ -23,9 +23,13 @@ env:
   NEW_VERSION: ""
   BRANCH_NAME: ""
   TAG_NAME: ""
-  PACKAGE_NAME: release_test
+  VERSION_UP_TYPE: ""
+  PACKAGE_NAME: pymolecule-parser
 jobs:
+  test:
+    uses: ./.github/workflows/reusable_test.yml
   release-pr:
+    needs: test
     runs-on: ubuntu-22.04
     timeout-minutes: 5
     steps:
@@ -42,10 +46,13 @@ jobs:
         run: |
           if ${{ github.event.inputs.major_versionup }}; then
             python .github/scripts/versionup.py --major
+            echo "VERSION_UP_TYPE=major" >> "$GITHUB_ENV
           elif ${{ github.event.inputs.minor_versionup }}; then
             python .github/scripts/versionup.py --minor
+            echo "VERSION_UP_TYPE=minor" >> "$GITHUB_ENV
           elif ${{ github.event.inputs.patch_versionup }}; then
             python .github/scripts/versionup.py --patch
+            echo "VERSION_UP_TYPE=patch" >> "$GITHUB_ENV
           fi
       - name: Get the NEW_VERSION
         run: |
@@ -53,14 +60,14 @@ jobs:
           echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_ENV
           echo "BRANCH_NAME=release-v$NEW_VERSION" >> $GITHUB_ENV
           echo "TAG_NAME=v$NEW_VERSION" >> $GITHUB_ENV
-      - name: "Create Pull request with ${{ env.TAG_NAME }} tag"
+      - name: Create Pull request with release-v${{ env.NEW_VERSION }} tag
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git checkout -b "${{ env.BRANCH_NAME }}"
           git add .
-          git commit -m "Release ${{ env.PACKAGE_NAME }} ${{ env.BRANCH_NAME }}"
+          git commit -m "Release ${{ env.PACKAGE_NAME }} ${{ env.NEW_VERSION }}"
           git push origin "${{ env.BRANCH_NAME }}"
-          gh pr create --title "Release ${{ env.PACKAGE_NAME }} ${{ env.BRANCH_NAME }}" --body "Release ${{ env.PACKAGE_NAME }} ${{ env.BRANCH_NAME }}"
+          gh pr create --title "Release ${{ env.PACKAGE_NAME }} ${{ env.NEW_VERSION }}" --body "Release ${{ env.PACKAGE_NAME }} ${{ env.NEW_VERSION }}" --label ${{ env.VERSION_UP_TYPE }} --label "release"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
