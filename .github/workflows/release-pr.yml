@@ -24,7 +24,7 @@ env:
   BRANCH_NAME: ""
   TAG_NAME: ""
   VERSION_UP_TYPE: ""
-  PACKAGE_NAME: pymolecule-parser
+  PACKAGE_NAME: release-test
 jobs:
   release-pr:
     runs-on: ubuntu-22.04
